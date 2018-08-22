@@ -25,7 +25,7 @@ $("#formSubmitButton").on("click", function grabUserSubmission(event) {
 function showResults() {
 
     var userPicture = $("img");
-    var queryURL 
+    var queryURL;
 
     // Empty the results div before putting new results each time the function gets called
     $("#results-appear-here").empty();
@@ -50,20 +50,21 @@ function showResults() {
     )};
 
     /// LinkedIn Photo upload
-    <script type="text/javascript" src="http://platform.linkedin.com/in.js">
-       api_key: 789vvi3eabtg46
-      onLoad: OnLinkedInFrameworkLoad;
-      authorize: true;
-     </script>
+      api_key =  ;
+      onLoad =  OnLinkedInFrameworkLoad;
+      authorize = true;
+     
      
      function onLinkedInLoad() 
-     
+     // submit photo to linkedin profile
      function OnLinkedInFrameworkLoad() {
       IN.Event.on(IN, "auth", OnLinkedInAuth);
     }
+    // if authorized bring to linkedIn profile
     function OnLinkedInAuth() {
       IN.API.Profile("me").result(ShowProfileData);
-  }
+  };
+  //show user linkedin profile
   function ShowProfileData(profiles) {
     var member = profiles.values[0];
     var id=member.id;
@@ -74,4 +75,4 @@ function showResults() {
 
     //use information captured above
     console.log(member)
-}
+};
