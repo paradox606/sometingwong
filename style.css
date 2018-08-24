@@ -13,6 +13,9 @@ body {
 .card-header {
     color: black;
 }
+.card-body {
+    color: black;
+}
 
 hr {
   max-width: 50px;
