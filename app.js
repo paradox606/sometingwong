@@ -50,7 +50,7 @@ function showResults() {
     )};
 
     /// LinkedIn Photo upload
-      api_key =  ;
+      api_key = "78kyu7q93daep2";
       onLoad =  OnLinkedInFrameworkLoad;
       authorize = true;
      
@@ -76,3 +76,5 @@ function showResults() {
     //use information captured above
     console.log(member)
 };
+
+
