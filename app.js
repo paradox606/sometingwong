@@ -13,54 +13,27 @@ firebase.initializeApp(config);
 // Creating a variable to reference the database.
 var database = firebase.database();
 
-
-// User clicks photo upload button
-
-$("#photoUploadButton").on("click", function uploadePicturePopUp () {
-
-    // This on click event will create a pop up of the user's computer files so that they can find their picture file and upload it into the application.
-
-});
-
-// Function for grabbing user's input photo and putting it on our browser
-
-function handleFiles (files) {
-
-    var file = fileInput.files[0]
-
-    if (!file.type.startsWith('image/')){ continue }
-
-    var img = document.createElement("img");
-    img.classList.add("obj");
-    img.file = file;
-    preview.appendChild(img); // Assuming that "preview" is the div output where the content will be displayed
-
-
-
-
-}
-
-
 $("#formSubmitButton").on("click", function grabUserSubmission(event) {
 
     event.preventDefault();
 
-    var userName = $("#userName").val.trim;
+    var userName = $("#userName").val().trim();
     var lookingSelect1
-    var userCommentsText = $("#userCommentsText").val.trim;
+    var userCommentsText = $("#userCommentsText").val().trim();
 
 
     // Store user information in firebase
-    database.ref().push({
-    UserName: userName,
-    JobSeeking: lookingSelect1,
-    UserComments: userCommentsText
-    });
-    
+   var newUser = {
+        UserName: userName,
+        JobSeeking: lookingSelect1,
+        UserComments: userCommentsText
+    };
 
+    database.ref().push(newUser);
 
+    // Clearing not 
+    $("#userInfo").reset();
 });
-
 
     // Function that analyses photos 
     function analyzation() {
@@ -95,8 +68,10 @@ $("#formSubmitButton").on("click", function grabUserSubmission(event) {
                 console.log(greatestEmotionVal);
                 console.log(greatestEmotion);
                 
-                $("#pastResults").append(greatestEmotionVal);
-                $("#pastResults").append(greatestEmotion);
+                
+                $("#pastResults").append(
+                    $("<p>").text("The average user is "+greatestEmotionVal+"% sure you display "+greatestEmotion+"."),                    
+                );
             }
             apparentEmotion();
 
@@ -108,13 +83,16 @@ $("#formSubmitButton").on("click", function grabUserSubmission(event) {
                 console.log("From a male perspective: " + beautyRatingM);
                 console.log("From a female perspective: " + beautyRatingF);
 
-                $("#pastResults").append(beautyRatingM);
-                $("#pastResults").append(beautyRatingF);
+                $("#pastResults").append(
+                    $("<p>").text("The average man thinks you are more attractive than "+beautyRatingM+"% of the population."),
+                    $("<p>").text("The average woman thinks you are more attractive than "+beautyRatingF+"% of the population."),
+                );
             }
             appraiseBeauty();
         });
     }
     analyzation();
+    
 
 
      /// LinkedIn Photo upload
@@ -170,9 +148,24 @@ fileInput.addEventListener('change', function() {
             'width':'100%'});
 
         // Put into firebase storage.
+        database.ref("/userPictures").push({
+            UserPicture: processedFile,
+            dateAdded: firebase.database.ServerValue.TIMESTAMP
+        });
        
     };
     
     // Read the file, which triggers the callback after the file is compete.
     fileReader.readAsDataURL(file);
 });
+
+
+database.ref("/userPictures").on("child_added", function(snapshot) {
+
+    userPictureBase64 = snapshot.val().UserPicture;
+    timeAdded = snapshot.val().dateAdded;
+
+    $("#pastResults").append("Past Picture: " + `<img id='FirebasePicture' src='${userPictureBase64}' width='50%'> <br>`);
+    $("#pastResults").append("Date Added: " + timeAdded + "<br>");
+
+})
