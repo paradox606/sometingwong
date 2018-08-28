@@ -3,6 +3,7 @@ var config = {
     apiKey: "AIzaSyBblANmtIQuZTTvQaTZ44ukGKn3WkzVcuE",
     authDomain: "baseline-project-one.firebaseapp.com",
     databaseURL: "https://baseline-project-one.firebaseio.com",
+    authDomain: "baseline-project-one.firebaseapp.com",
     projectId: "baseline-project-one",
     storageBucket: "",
     messagingSenderId: "471965093855"
@@ -13,27 +14,110 @@ firebase.initializeApp(config);
 // Creating a variable to reference the database.
 var database = firebase.database();
 
-$("#formSubmitButton").on("click", function grabUserSubmission(event) {
+// Authentication Code
+// const txtEmail = document.getElementById('txtEmail');
+// const txtPassword = document.getElementById('txtPassword');
+// const btnLogin = document.getElementById('btnLogin');
+// const btnSignup = document.getElementById('btnSignup');
+// const btnLogout = document.getElementById('btnLogout');
 
-    event.preventDefault();
+//   // Add login event
+//   btnLogin.addEventListener('click', e => {
+//       // Get email and pass
+//       const email = txtEmail.value;
+//       const pass = txtPassword.value;
+//       const auth = firebase.auth();
+//       // Sign in
+//       const promise = auth.signInWithEmailAndPassword(email, pass);
+//       promise.catch(e => console.log(e.message));
+//   });
+  
+//   // Add signup event
+//   btnSignup.addEventListener('click', e => {
+//       // Get email and pass
+//       // verify email input
+//       const email = txtEmail.value;
+//       const pass = txtPassword.value;
+//       const auth = firebase.auth();
+//       // Sign in
+//       const promise = auth.createUserWithEmailAndPassword(email, pass);
+//       promise.catch(e => console.log(e.message));
+//   });        
 
+//   btnLogout.addEventListener('click', e=> {
+//       firebase.auth().signOut();
+//   });
+
+//   // Add a realtime listener
+//   firebase.auth().onAuthStateChanged(firebaseUser => {
+//     if(firebaseUser) {
+//         console.log(firebaseUser);
+//         btnLogout.classList.remove('hide');
+//     } else {
+//         console.log('not logged in');
+//         btnLogout.classList.add('hide');
+//     }
+//   });
+
+$("#modalTrigger").on("click", function(event){
+    firebase.auth().onAuthStateChanged(function(user) {
+        if (user) {
+          // User is signed in.
+          var displayName = user.displayName;
+          document.getElementById('userName').textContent = displayName;
+        } else {
+          document.getElementById('userName').textContent = "Not logged in";
+        }
+    });
+});
+
+$("#formSubmitButton").on("click", function () {
+    
+    // Grabbing user info
     var userName = $("#userName").val().trim();
-    var lookingSelect1
+    var lookingSelect1 = $("#lookingSelect1");
     var userCommentsText = $("#userCommentsText").val().trim();
 
-
-    // Store user information in firebase
-   var newUser = {
+    var newUser = {
         UserName: userName,
         JobSeeking: lookingSelect1,
         UserComments: userCommentsText
     };
 
-    database.ref().push(newUser);
+    console.log(newUser);
+    database.ref("/userComments").push(newUser);
 
-    // Clearing not 
-    $("#userInfo").reset();
+    // fileInput.addEventListener('change', function() {
+        let file = fileInput.files[0];
+    
+        // Create a new File Reader
+        let fileReader = new FileReader();  
+        
+        // Set the 'onload' callback.
+        fileReader.onload = function (event) {
+           let processedFile = event.target.result;
+    
+            // Console the base 64 string
+            console.log(processedFile);
+        
+            $("#userPhoto").html("<img id='Picture'>");
+            $("#Picture").attr({
+                'src': processedFile,
+                'width':'100%'});
+    
+            // Put into firebase storage.
+            database.ref("/userPictures").push({
+                UserPicture: processedFile,
+                dateAdded: firebase.database.ServerValue.TIMESTAMP
+            });
+           
+        };
+        // Read the file, which triggers the callback after the file is compete.
+        fileReader.readAsDataURL(file); 
+        
+        document.getElementById("userInfo").reset();
 });
+
 
     // Function that analyses photos 
     function analyzation() {
@@ -93,74 +177,97 @@ $("#formSubmitButton").on("click", function grabUserSubmission(event) {
     }
     analyzation();
     
+///// 
+ //let imageData = "";
+ let verifyImage = "";
 
-
-     /// LinkedIn Photo upload
-     api_key =  "78kyu7q93daep2";
-     onLoad =  OnLinkedInFrameworkLoad;
-     authorize = true;
-    
-    
-    function onLinkedInLoad() {
-
-    };
-    
-    // submit photo to linkedin profile
-    function OnLinkedInFrameworkLoad() {
-     IN.Event.on(IN, "auth", OnLinkedInAuth);
-   }
-   // if authorized bring to linkedIn profile
-   function OnLinkedInAuth() {
-     IN.API.Profile("me").result(ShowProfileData);
+ var webcamModule = function() {
+   var streaming = false;
+   var video = null;
+ 
+   // image return
+ 
+   // console.log("TEST" +imageData);
+ 
+   (function() {
+     video = document.getElementById("webcamVideo");
+     navigator.mediaDevices
+       .getUserMedia({ audio: false, video: true })
+       .then(function(stream) {
+         if (navigator.mozGetUserMedia) {
+           video.mozSrcObject = stream;
+         } else {
+           var vendorURL = window.URL || window.webkitURL;
+           video.src = vendorURL.createObjectURL(stream);
+         }
+         video.play();
+         localStream = stream.getTracks()[0];
+       })
+       .catch(function(err) {
+         console.log(err);
+       });
+     video.addEventListener(
+       "canplay",
+       function(ev) {
+         if (!streaming) {
+           video.setAttribute("width", "600");
+           video.setAttribute("height", "450");
+           streaming = true;
+         }
+         var captureInterval = 5000;
+         var countdown = captureInterval / 1000;
+         var counterFunction = setInterval(function() {
+           $("#showCounter").html(countdown);
+ 
+           //Take the picture
+           if (countdown <= 0) {
+             takepicture(video);
+             clearInterval(counterFunction);
+             localStream.stop();
+           }
+           countdown--;
+         }, 1000);
+       },
+       false
+     );
+   })();
+ 
+   console.log("verify image: " + verifyImage);
  };
- //show user linkedin profile
- function ShowProfileData(profiles) {
-   var member = profiles.values[0];
-   var id=member.id;
-   var firstName=member.firstName;
-   var lastName=member.lastName;
-   var photo=member.pictureUrl;
-   var headline=member.headline;
+ 
+ var takepicture = function(video) {
+   $("#showCounter").html("Retrieving data...");
+   var canvas = document.createElement("CANVAS");
+   var context = canvas.getContext("2d");
+   canvas.width = "600";
+   canvas.height = "450";
+   // draw video image onto canvas, get data
+   context.drawImage(video, 0, 0);
+   var imageData = canvas.toDataURL("image/png");
+   $("#showCounter").html("See image data in console.");
+   $(video).hide();
+   console.log(imageData); ///return
+ 
+   //return imageData;
+   verifyImage = imageData.split(",")[1];
+ 
+   //Copy image data
+ };
+ 
+ 
 
-   //use information captured above
-   console.log(member)
-};
+
 
 // Get the file element
 let fileInput = document.querySelector('#image-file');
 
-fileInput.addEventListener('change', function() {
-    let file = fileInput.files[0];
-
-    // Create a new File Reader
-    let fileReader = new FileReader();
-    
-    // Set the 'onload' callback.
-    fileReader.onload = function (event) {
-        let processedFile = event.target.result;
-
-        // Console the base 64 string
-        console.log(processedFile);
-    
-        $("#userPhoto").html("<img id='Picture'>");
-        $("#Picture").attr({
-            'src': processedFile,
-            'width':'100%'});
-
-        // Put into firebase storage.
-        database.ref("/userPictures").push({
-            UserPicture: processedFile,
-            dateAdded: firebase.database.ServerValue.TIMESTAMP
-        });
-       
-    };
-    
-    // Read the file, which triggers the callback after the file is compete.
-    fileReader.readAsDataURL(file);
-});
 
 
-database.ref("/userPictures").on("child_added", function(snapshot) {
+$("#pastResultsButton").on("click", function(event){
+
+    event.preventDefault();
+
+    database.ref("/userPictures").on("child_added", function(snapshot) {
 
     userPictureBase64 = snapshot.val().UserPicture;
     timeAdded = snapshot.val().dateAdded;
@@ -169,3 +276,4 @@ database.ref("/userPictures").on("child_added", function(snapshot) {
     $("#pastResults").append("Date Added: " + timeAdded + "<br>");
 
 })
+});
